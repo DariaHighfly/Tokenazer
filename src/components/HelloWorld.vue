@@ -4,16 +4,8 @@
       <h2>ТОКЕНИЗАТОР</h2>
     </header>
     <div class="form">
-      <p>Выберите, как вы хотите разделить текст:</p>
-      <p class="form-title">Умная токенизация</p>
-      <p class="form-text">
-        Данные 3 вида токенизации предусматривают не только простое разбиение по опредленному
-        разделителю (например, по пробелу или по точкам), но и обрабатывает сложные случаи.
-        Если не хотите, чтобы программа удаляла дублирующие пробелы, снимите голочку с соответсвующей настройки ниже.
-        Если хотите, чтобы был удален последний незначимый символ в тексте (пробельный  символ или перевод строки),
-        поставьте галочку в соответсвующей настройке ниже.
-        Если хотите другое разбиение на токены, воспользуйтесь разделом "Пользовательская токенизация".
-      </p>
+      <p class="form-text">Выберите, как вы хотите разделить текст:</p>
+      <p class="form-title">Токенизация</p>
       <div class="form__button-default">
         <button
           class="form__button"
@@ -25,59 +17,40 @@
         </button>
         <button
           class="form__button"
-          @click="
-                tokenType = 'default';
-                tokenValue = 'sentence';"
-          v-bind:style="tokenValue === 'sentence' ? 'background-color: #1c867e' : 'background-color: lightseagreen'">
-          На предложения
-        </button>
-        <button
-          class="form__button"
           @click="tokenType = 'default';
-                tokenValue = 'line'"
+                  tokenValue = 'line'"
           v-bind:style="tokenValue === 'line' ? 'background-color: #1c867e' : 'background-color: lightseagreen'">
           На строки
         </button>
       </div>
-      <div class="checkboxOverride">
-        <input type="checkbox" id="checkboxInputOverride" :value="deleteSpaces" v-model="deleteSpaces">
-        <label for="checkboxInputOverride">Убрать дублирующие пробелы</label>
-      </div>
-      <div class="checkboxOverride">
-        <input type="checkbox" id="checkboxInputDelete" v-model="deleteLastSymbol">
-        <label for="checkboxInputDelete">Убрать последний незначимый символ в тексте</label>
-      </div>
-      <div class="form__buttons-custom">
-        <p
-          v-if="!isCustomTokenType"
-          class="button-change-type"
-          @click="isCustomTokenType = true">
-          <u>Пользовательская токенизация</u>
-        </p>
-        <div
-          v-if="isCustomTokenType">
-          <div class="custom-box">
-            <button
-              class="form__button-custom"
-              @click="tokenType = 'custom';
-                      tokenValue = 'space'"
-              v-bind:style="tokenValue === 'space' ? 'background-color: #1c867e' : 'background-color: lightseagreen'">
-              Разделить только по пробелам
-            </button>
-            <button
-              class="form__button-custom"
-              @click="tokenType = 'custom';
-                      tokenValue = 'punctuation'"
-              v-bind:style="tokenValue === 'punctuation' ? 'background-color: #1c867e' : 'background-color: lightseagreen'">
-              Разделить по знакам препинания и пробелам
-            </button>
-            <button
-              class="form__button-custom"
-              @click="tokenType = 'custom'; tokenValue = 'symbol'"
-              v-bind:style="tokenValue === 'symbol' ? 'background-color: #1c867e' : 'background-color: lightseagreen'">
-              Разделить посимвольно
-            </button>
-          </div>
+      <p
+        v-if="!isCustomTokenType"
+        class="button-change-type"
+        @click="isCustomTokenType = true">
+        <u>Пользовательская токенизация</u>
+      </p>
+      <div class="form__buttons-custom" v-if="isCustomTokenType">
+        <div class="custom-box">
+          <button
+            class="form__button-custom"
+            @click="tokenType = 'custom';
+                        tokenValue = 'space'"
+            v-bind:style="tokenValue === 'space' ? 'background-color: #1c867e' : 'background-color: lightseagreen'">
+            Разделить только по пробелам
+          </button>
+          <button
+            class="form__button-custom"
+            @click="tokenType = 'custom';
+                        tokenValue = 'punctuation'"
+            v-bind:style="tokenValue === 'punctuation' ? 'background-color: #1c867e' : 'background-color: lightseagreen'">
+            Разделить по знакам препинания,переносу строк и пробелам
+          </button>
+          <button
+            class="form__button-custom"
+            @click="tokenType = 'custom'; tokenValue = 'symbol'"
+            v-bind:style="tokenValue === 'symbol' ? 'background-color: #1c867e' : 'background-color: lightseagreen'">
+            Разделить посимвольно
+          </button>
         </div>
       </div>
       <p
@@ -86,6 +59,18 @@
         @click="isCustomTokenType = false">
         <u>Скрыть</u>
       </p>
+
+      <p class="form-title">Сегментация</p>
+      <div class="custom-box">
+        <button
+          class="form__button"
+          @click="
+                tokenType = 'default';
+                tokenValue = 'sentence';"
+          v-bind:style="tokenValue === 'sentence' ? 'background-color: #1c867e' : 'background-color: lightseagreen'">
+          На предложения
+        </button>
+      </div>
       <textarea
         v-if="tokenType"
         class="form_textarea"
@@ -125,31 +110,29 @@
         deleteLastSymbol: false,
       }
     },
-    watch: {
-      deleteSpaces: (v) => {
-        console.log(v);
-      },
-      deleteLastSymbol: (v) => {
-        console.log(v);
-      }
-    },
     methods: {
       deleteSpacesInText() {
         this.inputText = this.inputText.replace(/[ \t\v\r\f]+/g, " ");
+        while (this.inputText[this.inputText.length - 1] === " " && this.inputText.length !== 0) {
+          this.inputText = this.inputText.substring(0, this.inputText.length - 1);
+        }
       },
       deleteNewLinesInText() {
         this.inputText = this.inputText.replace(/\n+/g, "");
       },
       deleteLastSymbolInText() {
-        console.log((this.tokensArray[this.tokensArray.length - 1].replace(/[ \t\v\r\f]+/g, "")));
-        if (/\s/.test(this.tokensArray[this.tokensArray.length - 1])) {
-          this.tokensArray = this.tokensArray.splice(-1,1);
+        let test = this.tokensArray[this.tokensArray.length - 1].replace(/[ \t\v\r\f\n\s]+/g, "");
+        if (test === "") {
+          this.tokensArray.splice(-1,1);
         }
-        console.log(this.tokensArray);
+      },
+      replaceQuotes() {
+        this.inputText = this.inputText.replace(/\"/g, "'");
       },
       startTokenization() {
         let type = this.tokenType;
         let value = this.tokenValue;
+        this.replaceQuotes();
         if (this.deleteSpaces) {
           this.deleteSpacesInText();
         }
@@ -170,28 +153,146 @@
             this.parseCustomBySymbol();
           }
         }
-        if (this.deleteLastSymbol) {
-          this.deleteLastSymbolInText();
-        }
+        this.deleteLastSymbolInText();
       },
       parseDefaultByWord() {
         this.deleteNewLinesInText();
         //this.tokensArray = this.inputText.split(' ');
       },
       parseDefaultBySentences() {
+        this.tokensArray = [];
+        console.log(this.inputText);
+        this.deleteSpacesInText();
         this.deleteNewLinesInText();
-        //this.tokensArray = this.inputText.split(' ');
+        let i = 0;
+        let quotesBegins = false;
+        let punctuationBegins = false;
+        // let sentenceClosed = false;
+        while (i < this.inputText.length) {
+          if (this.inputText[i].match(/[!?]/)) {
+            if (!punctuationBegins) {
+              punctuationBegins = true;
+            }
+            if (this.tokensArray.length === 0) {
+              this.tokensArray = ["Введенный текст некорректен относительно правил русского языка"];
+              break;
+            }
+            // могут  быть несколько знаков вопроса и восклицания
+            this.tokensArray[this.tokensArray.length - 1] = this.tokensArray[this.tokensArray.length - 1] + this.inputText[i];
+            ++i;
+          } else if (this.inputText[i].match(/[.]/)) {
+            // может быть многоточие
+            if (i + 2 < this.inputText.length &&
+              (this.inputText[i + 1].match(/[.]/)) && (this.inputText[i + 2].match(/[.]/))) {
+              this.tokensArray[this.tokensArray.length - 1] = this.tokensArray[this.tokensArray.length - 1] + "...";
+              i += 3;
+              punctuationBegins = true;
+              // или аббривиатура, или инициал
+            } else if (i - 1 >= 0 && this.inputText[i - 1].match(/[А-ЯЁ]/)) {
+              this.tokensArray[this.tokensArray.length - 1] =
+                this.tokensArray[this.tokensArray.length - 1] + ".";
+              punctuationBegins = false;
+              ++i;
+              //или сокращения
+            } else if (i - 1 >= 0 && i + 2 < this.inputText.length &&
+              (this.inputText.substring(i - 1, i + 3) === "т.е.")) {
+              this.tokensArray[this.tokensArray.length - 1] =
+                this.tokensArray[this.tokensArray.length - 1] + this.inputText.substring(i, i + 3);
+              punctuationBegins = false;
+              i += 3;
+            } else if (i - 1 >= 0 && i + 3 < this.inputText.length &&
+              (this.inputText.substring(i - 1, i + 4) === "т. е.")) {
+              this.tokensArray[this.tokensArray.length - 1] =
+                this.tokensArray[this.tokensArray.length - 1] + this.inputText.substring(i, i + 4);
+              punctuationBegins = false;
+              i += 4;
+            } else if (i - 3 >= 0 && i + 2 < this.inputText.length &&
+              (this.inputText.substring(i - 3, i + 3) === "и т.п." ||
+                this.inputText.substring(i - 3, i + 3) === "и т.д.")) {
+              this.tokensArray[this.tokensArray.length - 1] =
+                this.tokensArray[this.tokensArray.length - 1] + this.inputText.substring(i, i + 3);
+              punctuationBegins = false;
+              i += 3;
+            } else if (i - 3 >= 0 && i + 3 < this.inputText.length &&
+              (this.inputText.substring(i - 3, i + 4) === "и т. п." ||
+                this.inputText.substring(i - 3, i + 4) === "и т. д.")) {
+              this.tokensArray[this.tokensArray.length - 1] =
+                this.tokensArray[this.tokensArray.length - 1] + this.inputText.substring(i, i + 4);
+              punctuationBegins = false;
+              i += 4;
+
+            } else if (i - 4 >= 0 &&
+              (this.inputText.substring(i - 4, i + 1) === "и др." ||
+                this.inputText.substring(i - 4, i + 1) === "и пр.")) {
+              this.tokensArray[this.tokensArray.length - 1] =
+                this.tokensArray[this.tokensArray.length - 1] + ".";
+              punctuationBegins = false;
+              ++i;
+            } else {
+              // значит, просто знак препинания
+              this.tokensArray[this.tokensArray.length - 1] = this.tokensArray[this.tokensArray.length - 1] + ".";
+              punctuationBegins = true;
+              ++i;
+            }
+          } else if (this.inputText[i].match(/["«»‘’']/)) {
+            if (this.tokensArray.length === 0 || (punctuationBegins === true && quotesBegins === false)) {
+              this.tokensArray.push(this.inputText[i]);
+            } else {
+              this.tokensArray[this.tokensArray.length - 1] = this.tokensArray[this.tokensArray.length - 1] + this.inputText[i];
+            }
+            if (!quotesBegins) {
+              quotesBegins = true;
+            } else {
+              quotesBegins = false;
+              console.log(this.inputText[i + 1]);
+              console.log(this.inputText[i + 2]);
+              console.log(this.inputText[i + 3]);
+              if (i + 3 < this.inputText.length &&
+                (this.inputText[i + 1].match(/[–-]+/) ||
+                  this.inputText[i + 2].match(/[–-]+/) ||
+                  this.inputText[i + 3].match(/[–-]+/))) {
+                console.log("*");
+                punctuationBegins = false;
+              }
+            }
+            ++i;
+          } else {
+            if (punctuationBegins && !quotesBegins) {
+              punctuationBegins = false;
+              if (this.inputText[i] === " ") {
+                this.tokensArray.push(this.inputText[i + 1]);
+                i += 2;
+              } else {
+                this.tokensArray.push(this.inputText[i]);
+                ++i;
+              }
+            } else {
+              if (this.tokensArray.length === 0) {
+                this.tokensArray.push(this.inputText[i]);
+                ++i;
+              } else {
+                this.tokensArray[this.tokensArray.length - 1] = this.tokensArray[this.tokensArray.length - 1] + this.inputText[i];
+                ++i;
+              }
+            }
+          }
+        }
       },
       parseDefaultByLine() {
         this.tokensArray = this.inputText.split('\n');
       },
       parseCustomBySpace() {
         this.deleteNewLinesInText();
-        // this.inputText =  this.inputText.replace(/\"/g, '0').replace(/\\(.)/g, "$1");
         this.tokensArray = this.inputText.split(' ');
       },
       parseCustomByPunctuation() {
-        let reg = /[|!|;|:|,|\.|\?|-|\n]/g;
+        for (let i = 0; i !== this.inputText.length; ++i) {
+          if (this.inputText[i].match(/[!?.:;,]/) &&
+            (i !== this.inputText.length - 2) && (this.inputText[i + 1] === " ")) {
+            this.inputText = this.inputText.slice(0, i + 1) + this.inputText.slice(i + 2, this.inputText.length);
+          }
+        }
+        let reg = /[|!|;|:|,|\.|\?|-|--|\n\s]+/g;
         this.tokensArray = this.inputText.split(reg);
       },
       parseCustomBySymbol() {
@@ -223,7 +324,7 @@
   .form-text {
     max-width: 650px;
     text-align: justify;
-    font-size: 16px;
+    font-size: 18px;
   }
 
   .form {
