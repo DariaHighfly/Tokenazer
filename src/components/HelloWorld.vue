@@ -5,6 +5,19 @@
     </header>
     <div class="form">
       <p class="form-text">Выберите, как вы хотите разделить текст:</p>
+
+      <p class="form-title">Сегментация</p>
+      <div class="custom-box">
+        <button
+          class="form__button"
+          @click="
+                tokenType = 'default';
+                tokenValue = 'sentence';"
+          v-bind:style="tokenValue === 'sentence' ? 'background-color: #1c867e' : 'background-color: lightseagreen'">
+          На предложения
+        </button>
+      </div>
+
       <p class="form-title">Токенизация</p>
       <div class="form__button-default">
         <button
@@ -59,18 +72,6 @@
         @click="isCustomTokenType = false">
         <u>Скрыть</u>
       </p>
-
-      <p class="form-title">Сегментация</p>
-      <div class="custom-box">
-        <button
-          class="form__button"
-          @click="
-                tokenType = 'default';
-                tokenValue = 'sentence';"
-          v-bind:style="tokenValue === 'sentence' ? 'background-color: #1c867e' : 'background-color: lightseagreen'">
-          На предложения
-        </button>
-      </div>
       <textarea
         v-if="tokenType"
         class="form_textarea"
@@ -157,17 +158,15 @@
       },
       parseDefaultByWord() {
         this.deleteNewLinesInText();
-        //this.tokensArray = this.inputText.split(' ');
+        this.tokensArray = this.inputText.split(' ');
       },
       parseDefaultBySentences() {
         this.tokensArray = [];
-        console.log(this.inputText);
         this.deleteSpacesInText();
         this.deleteNewLinesInText();
         let i = 0;
         let quotesBegins = false;
         let punctuationBegins = false;
-        // let sentenceClosed = false;
         while (i < this.inputText.length) {
           if (this.inputText[i].match(/[!?]/)) {
             if (!punctuationBegins) {
@@ -177,23 +176,34 @@
               this.tokensArray = ["Введенный текст некорректен относительно правил русского языка"];
               break;
             }
+            if (this.inputText[i] === "!" && this.inputText[i - 1].match(/[0-9]/)) {
+              punctuationBegins = false;
+            }
             // могут  быть несколько знаков вопроса и восклицания
             this.tokensArray[this.tokensArray.length - 1] = this.tokensArray[this.tokensArray.length - 1] + this.inputText[i];
             ++i;
           } else if (this.inputText[i].match(/[.]/)) {
+            if (this.tokensArray.length === 0) {
+              this.tokensArray = ["Введенный текст некорректен относительно правил русского языка"];
+              break;
+            }
             // может быть многоточие
             if (i + 2 < this.inputText.length &&
               (this.inputText[i + 1].match(/[.]/)) && (this.inputText[i + 2].match(/[.]/))) {
               this.tokensArray[this.tokensArray.length - 1] = this.tokensArray[this.tokensArray.length - 1] + "...";
               i += 3;
               punctuationBegins = true;
+            } else if (this.inputText[i - 1].match(/[0-9]/) && this.inputText[i + 1].match(/[0-9]/)) {
+              this.tokensArray[this.tokensArray.length - 1] = this.tokensArray[this.tokensArray.length - 1] + ".";
+              punctuationBegins = false;
+              ++i;
               // или аббривиатура, или инициал
             } else if (i - 1 >= 0 && this.inputText[i - 1].match(/[А-ЯЁ]/)) {
               this.tokensArray[this.tokensArray.length - 1] =
                 this.tokensArray[this.tokensArray.length - 1] + ".";
               punctuationBegins = false;
               ++i;
-              //или сокращения
+              // или сокращения
             } else if (i - 1 >= 0 && i + 2 < this.inputText.length &&
               (this.inputText.substring(i - 1, i + 3) === "т.е.")) {
               this.tokensArray[this.tokensArray.length - 1] =
