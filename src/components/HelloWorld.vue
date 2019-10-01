@@ -22,25 +22,25 @@
       <div class="form__button-default">
         <button
           class="form__button"
+          @click="tokenType = 'default';
+                  tokenValue = 'line'"
+          v-bind:style="tokenValue === 'line' ? 'background-color: #1c867e' : 'background-color: lightseagreen'">
+          На строки
+        </button>
+        <button
+          class="form__button"
           @click="
                 tokenType = 'default';
                 tokenValue = 'word';"
           v-bind:style="tokenValue === 'word' ? 'background-color: #1c867e' : 'background-color: lightseagreen'">
           На слова
         </button>
-        <button
-          class="form__button"
-          @click="tokenType = 'default';
-                  tokenValue = 'line'"
-          v-bind:style="tokenValue === 'line' ? 'background-color: #1c867e' : 'background-color: lightseagreen'">
-          На строки
-        </button>
       </div>
       <p
         v-if="!isCustomTokenType"
         class="button-change-type"
         @click="isCustomTokenType = true">
-        <u>Пользовательская токенизация</u>
+        <u>Дополнительная токенизация</u>
       </p>
       <div class="form__buttons-custom" v-if="isCustomTokenType">
         <div class="custom-box">
@@ -56,7 +56,7 @@
             @click="tokenType = 'custom';
                         tokenValue = 'punctuation'"
             v-bind:style="tokenValue === 'punctuation' ? 'background-color: #1c867e' : 'background-color: lightseagreen'">
-            Разделить по знакам препинания,переносу строк и пробелам
+            Разделить по знакам препинания, переносу строк и пробелам
           </button>
           <button
             class="form__button-custom"
@@ -81,7 +81,7 @@
       <button
         v-if="tokenType"
         class="form__button"
-        @click="startTokenization">Разбить на токены
+        @click="startTokenization">Разделить
       </button>
       <div v-if="tokensArray.length">
         <p class="tokens-array__title">Результат:</p>
@@ -158,7 +158,14 @@
       },
       parseDefaultByWord() {
         this.deleteNewLinesInText();
-        this.tokensArray = this.inputText.split(' ');
+        for (let i = 0; i !== this.inputText.length; ++i) {
+          if (this.inputText[i].match(/[!?.:;,]/) &&
+            (i !== this.inputText.length - 2) && (this.inputText[i + 1] === " ")) {
+            this.inputText = this.inputText.slice(0, i + 1) + this.inputText.slice(i + 2, this.inputText.length);
+          }
+        }
+        let reg = /[|!|;|:|,|\.|\?|-|–|\n\s]+/g;
+        this.tokensArray = this.inputText.split(reg);
       },
       parseDefaultBySentences() {
         this.tokensArray = [];
@@ -302,7 +309,7 @@
             this.inputText = this.inputText.slice(0, i + 1) + this.inputText.slice(i + 2, this.inputText.length);
           }
         }
-        let reg = /[|!|;|:|,|\.|\?|-|--|\n\s]+/g;
+        let reg = /[|!|;|:|,|\.|\?|-|–|\n\s]+/g;
         this.tokensArray = this.inputText.split(reg);
       },
       parseCustomBySymbol() {
