@@ -2,6 +2,8 @@
 
 https://dariahighflytokengen.herokuapp.com/#/
 
+# Отчет о проделанной работе находится в файле Report.pdf
+
 ## Сборка и запуск проекта локально:
 
 ``` bash
